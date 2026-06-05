@@ -19,6 +19,19 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { logout } = useAuth();
   const navigate = useNavigate();
 
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const dropdownRef = React.useRef<HTMLDivElement>(null);
+
+  React.useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setIsDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
+
   const handleLogout = async () => {
     await logout();
     navigate('/login');
@@ -110,8 +123,40 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
               <span className="text-xs font-bold text-emerald-500 uppercase tracking-tighter">System Live</span>
             </div>
             
-            <div className="h-9 w-9 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold shadow-lg border border-white/10 cursor-pointer hover:scale-105 transition-transform">
-              {user?.display_name?.charAt(0).toUpperCase() || user?.email?.charAt(0).toUpperCase() || 'U'}
+            {/* Profile Dropdown */}
+            <div className="relative" ref={dropdownRef}>
+              <div 
+                className="h-9 w-9 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold shadow-lg border border-white/10 cursor-pointer hover:scale-105 transition-transform"
+                onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+              >
+                {user?.display_name?.charAt(0).toUpperCase() || user?.email?.charAt(0).toUpperCase() || 'U'}
+              </div>
+              
+              {isDropdownOpen && (
+                <div className="absolute right-0 mt-3 w-56 bg-[#16161a] rounded-2xl shadow-2xl border border-white/10 py-2 z-50 animate-fade-slide-up">
+                  <div className="px-4 py-3 border-b border-white/5">
+                    <p className="text-sm font-semibold text-white truncate">
+                      {user?.display_name || 'User'}
+                    </p>
+                    <p className="text-xs text-slate-400 truncate mt-0.5">{user?.email}</p>
+                  </div>
+                  <button
+                    onClick={() => { setIsDropdownOpen(false); navigate('/settings'); }}
+                    className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-white/5 text-slate-400 hover:text-white transition-colors text-sm"
+                  >
+                    <Settings className="w-4 h-4" />
+                    <span>Settings</span>
+                  </button>
+                  <div className="border-t border-white/5 my-1" />
+                  <button
+                    onClick={() => { setIsDropdownOpen(false); handleLogout(); }}
+                    className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-red-500/10 text-slate-400 hover:text-red-500 transition-colors text-sm"
+                  >
+                    <LogOut className="w-4 h-4" />
+                    <span>Sign Out</span>
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         </header>
