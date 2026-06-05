@@ -433,13 +433,13 @@ VITE_API_BASE_URL=https://verif-ai-backend.onrender.com
 
 ### Phase 2: Student Dashboard
 - [x] `StudentHomePage.tsx` — job listings, search, filters, profile sidebar
-- [ ] `UploadPanel.tsx` — drag-drop resume PDF + certificates
-- [ ] Wire to `POST /api/v1/documents/upload`
-- [ ] "Analyze" button → `POST /api/v1/analysis/start` → get `websocket_url`
-- [ ] `useAnalysisStream.ts` WebSocket hook
-- [ ] `ResearchLogFeed.tsx` — live scrolling terminal feed
+- [x] `UploadPanel.tsx` — drag-drop resume PDF + certificates
+- [x] Wire to `POST /api/v1/documents/upload`
+- [x] "Analyze" button → `POST /api/v1/analysis/start` → get `websocket_url`
+- [x] `useAnalysisStream.ts` WebSocket hook
+- [x] `ResearchLogFeed.tsx` — live scrolling terminal feed
 - [ ] `AgentStatusBar.tsx` — resume/cert/github agent progress indicators
-- [ ] `TrustScoreCard.tsx` — appears on `analysis_complete` event
+- [x] `TrustScoreCard.tsx` — appears on `analysis_complete` event
 
 ### Phase 3: Public Profile + Recruiter
 - [x] `PublicProfilePage.tsx` — `/profile/:uid` → `GET /api/v1/profile/:uid`

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Loader2 } from 'lucide-react';
 import Layout from '../components/Layout';
 import { UploadPanel } from '../components/dashboard/UploadPanel';
@@ -8,27 +8,43 @@ import { Button } from '../components/ui/Button';
 import { Card, CardBody, CardHeader } from '../components/ui/Card';
 import { useAnalysisStream } from '../hooks/useAnalysisStream';
 import { analysisApi } from '../api/analysis';
+import { documentsApi } from '../api/documents'; // Import documentsApi
 import { TrustScore, Document } from '../types';
 import toast from 'react-hot-toast';
 
 const StudentDashboard: React.FC = () => {
   const [trustScore, setTrustScore] = useState<TrustScore | null>(null);
-  const [analysisId, setAnalysisId] = useState<string | null>(null);
+  const [jobId, setJobId] = useState<string | null>(null);
+  const [websocketUrl, setWebsocketUrl] = useState<string | null>(null);
   const [isLoadingTrustScore, setIsLoadingTrustScore] = useState(false);
   const [isStartingAnalysis, setIsStartingAnalysis] = useState(false);
-  const [uploadedDocCount, setUploadedDocCount] = useState(0);
+  const [isAnalysisReady, setIsAnalysisReady] = useState(false);
+  const [analysisReadiness, setAnalysisReadiness] = useState<{ has_resume: boolean; has_certificate: boolean; has_github: boolean; is_ready: boolean; missing: string[] } | null>(null);
 
   const { logs, isConnected, isLoading, error, agentStatuses, clearLogs } =
-    useAnalysisStream(analysisId);
+    useAnalysisStream(websocketUrl);
 
-  // Load trust score on mount
+  const checkReadiness = useCallback(async () => {
+    try {
+      const response = await documentsApi.getReadiness();
+      if (response.success) {
+        setAnalysisReadiness(response.data);
+        setIsAnalysisReady(response.data.is_ready);
+      }
+    } catch (error) {
+      console.error('Failed to fetch analysis readiness:', error);
+      toast.error('Failed to load analysis readiness status.');
+    }
+  }, []);
+
+  // Load trust score and initial readiness on mount
   useEffect(() => {
-    const loadTrustScore = async () => {
+    const loadInitialData = async () => {
       setIsLoadingTrustScore(true);
       try {
-        const response = await analysisApi.getTrustScore();
-        if (response.success) {
-          setTrustScore(response.data);
+        const scoreResponse = await analysisApi.getTrustScore();
+        if (scoreResponse.success) {
+          setTrustScore(scoreResponse.data);
         }
       } catch (error) {
         console.error('Failed to load trust score:', error);
@@ -36,28 +52,44 @@ const StudentDashboard: React.FC = () => {
       } finally {
         setIsLoadingTrustScore(false);
       }
+      checkReadiness();
     };
-
-    loadTrustScore();
-  }, []);
-
-  const handleUploadSuccess = (document: Document) => {
-    setUploadedDocCount((prev) => prev + 1);
-  };
+    loadInitialData();
+  }, [checkReadiness]);
 
   const handleStartAnalysis = async () => {
-    if (uploadedDocCount === 0) {
-      toast.error('Please upload at least one document first');
-      return;
-    }
-
     setIsStartingAnalysis(true);
     clearLogs();
+    setTrustScore(null); // Clear previous trust score
+
     try {
-      const response = await analysisApi.start();
+      const allDocsResponse = await documentsApi.getAll();
+      if (!allDocsResponse.success) {
+        throw new Error(allDocsResponse.message || 'Failed to fetch uploaded documents.');
+      }
+
+      const uploadedDocs = allDocsResponse.data;
+      const resumeDoc = uploadedDocs.find(doc => doc.type === 'resume' && doc.status === 'done');
+      const certificateDocs = uploadedDocs.filter(doc => doc.type === 'certificate' && doc.status === 'done');
+      const githubDoc = uploadedDocs.find(doc => doc.type === 'github' && doc.status === 'done');
+
+      if (!resumeDoc || certificateDocs.length === 0 || !githubDoc) {
+        toast.error('Please ensure all required documents (resume, certificates, GitHub URL) are uploaded and processed.');
+        setIsStartingAnalysis(false);
+        return;
+      }
+
+      const cert_doc_ids = certificateDocs.map(doc => doc.document_id);
+      const resume_document_id = resumeDoc.document_id;
+      const github_url = githubDoc.github_url || '';
+
+      const response = await analysisApi.start(resume_document_id, cert_doc_ids, github_url);
       if (response.success) {
-        setAnalysisId(response.data.analysis_id);
+        setJobId(response.data.job_id);
+        setWebsocketUrl(response.data.websocket_url);
         toast.success('Analysis started! Check the log below.');
+      } else {
+        throw new Error(response.message || 'Failed to start analysis');
       }
     } catch (error: any) {
       let errorMsg = error.message;
@@ -73,6 +105,32 @@ const StudentDashboard: React.FC = () => {
       setIsStartingAnalysis(false);
     }
   };
+
+  useEffect(() => {
+    // When analysis completes, fetch the new trust score
+    if (logs.some(log => log.type === 'analysis_complete')) {
+      const fetchFinalTrustScore = async () => {
+        setIsLoadingTrustScore(true);
+        try {
+          const response = await analysisApi.getTrustScore();
+          if (response.success) {
+            setTrustScore(response.data);
+            toast.success('Analysis complete! Trust score updated.');
+          }
+        } catch (error) {
+          console.error('Failed to fetch final trust score:', error);
+          toast.error('Could not fetch final trust score.');
+        } finally {
+          setIsLoadingTrustScore(false);
+        }
+      };
+      fetchFinalTrustScore();
+    }
+  }, [logs]);
+
+  const missingDocsMessage = analysisReadiness?.missing.length
+    ? `Missing: ${analysisReadiness.missing.join(', ')}`
+    : 'All documents uploaded!';
 
   return (
     <Layout>
@@ -95,7 +153,9 @@ const StudentDashboard: React.FC = () => {
                 <h2 className="text-lg font-bold text-white">Upload Documents</h2>
               </CardHeader>
               <CardBody>
-                <UploadPanel onUploadSuccess={handleUploadSuccess} />
+                <UploadPanel
+                  onAnalysisReady={setIsAnalysisReady}
+                />
               </CardBody>
             </Card>
 
@@ -106,15 +166,15 @@ const StudentDashboard: React.FC = () => {
                   <div>
                     <h3 className="text-sm font-bold text-white">Ready to Verify?</h3>
                     <p className="text-xs text-slate-400 mt-1">
-                      {uploadedDocCount === 0
-                        ? 'Upload documents to get started'
-                        : `${uploadedDocCount} document(s) ready`}
+                      {analysisReadiness?.is_ready
+                        ? 'All required documents are uploaded and processed.'
+                        : missingDocsMessage}
                     </p>
                   </div>
                   <Button
                     variant="primary"
                     onClick={handleStartAnalysis}
-                    disabled={uploadedDocCount === 0}
+                    disabled={!isAnalysisReady || isStartingAnalysis}
                     isLoading={isStartingAnalysis}
                   >
                     {isStartingAnalysis ? 'Starting...' : 'Start Verification'}
@@ -124,7 +184,7 @@ const StudentDashboard: React.FC = () => {
             </Card>
 
             {/* Research Log */}
-            {analysisId && (
+            {websocketUrl && (
               <ResearchLogFeed
                 logs={logs}
                 agentStatuses={agentStatuses}
@@ -149,7 +209,7 @@ const StudentDashboard: React.FC = () => {
               <ul className="space-y-2 text-sm text-slate-400">
                 <li className="flex gap-2">
                   <span className="text-blue-400 font-bold">1.</span>
-                  <span>Upload your resume, certificates, and transcript</span>
+                  <span>Upload your resume, certificates, and GitHub URL</span>
                 </li>
                 <li className="flex gap-2">
                   <span className="text-blue-400 font-bold">2.</span>

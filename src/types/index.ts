@@ -45,19 +45,20 @@ export interface HealthResponse {
 
 // Document types
 export interface Document {
-  id: string;
-  user_id: string;
-  type: 'resume' | 'certificate' | 'transcript';
-  file_name: string;
-  file_url: string;
-  uploaded_at: string;
-  status: 'pending' | 'processed' | 'failed';
+  document_id: string; // Renamed from 'id' to match backend
+  user_id: string; // Added to match backend
+  type: 'resume' | 'certificate' | 'github'; // Added 'github' type
+  file_name: string; // Renamed from 'file_name' to match backend
+  hash_sha256: string; // Added to match backend
+  status: 'pending' | 'processed' | 'analyzing' | 'done' | 'failed'; // Added 'analyzing', 'done'
+  uploaded_at: string; // Added to match backend
+  github_url?: string; // Added for github document type
 }
 
 export interface DocumentUploadResponse {
   success: boolean;
   message: string;
-  data: Document;
+  data: Document[]; // Changed to array of Document
 }
 
 // Analysis & Trust Score
@@ -78,6 +79,11 @@ export interface LogEntry {
   type: 'info' | 'progress' | 'warning' | 'success' | 'error';
   message: string;
   agent: 'resume' | 'certificate' | 'github';
+}
+
+export interface AnalysisStartResponse {
+  job_id: string;
+  websocket_url: string;
 }
 
 export interface AnalysisResponse {

@@ -1,28 +1,20 @@
 import client from './client';
-import { AnalysisResponse, TrustScore, LogEntry } from '../types';
+import { AnalysisResponse, TrustScore, LogEntry, AnalysisStartResponse } from '../types';
+import { auth } from '../lib/firebase'; // Import Firebase auth
 
 export const analysisApi = {
   /**
    * Trigger analysis on user's uploaded documents
-   * This will start the resume, certificate, and GitHub verification agents
+   * @param resume_document_id - The document_id of the uploaded resume
+   * @param cert_doc_ids - An array of document_ids for uploaded certificates
+   * @param github_url - The submitted GitHub profile URL
    */
-  start: async (): Promise<AnalysisResponse> => {
+  start: async (resume_document_id: string, cert_doc_ids: string[], github_url: string): Promise<{ success: boolean; data: AnalysisStartResponse }> => {
     try {
-      const response = await client.post<any>(
-        '/api/v1/analysis/start'
+      const response = await client.post<{ success: boolean; data: AnalysisStartResponse }>(
+        '/api/v1/analysis/start',
+        { resume_document_id, cert_doc_ids, github_url }
       );
-      // Backend returns { job_id: '...', websocket_url: '...' }
-      // Map it to AnalysisResponse format expected by frontend
-      if (response.data && response.data.job_id) {
-        return {
-          success: true,
-          message: 'Analysis started',
-          data: {
-            analysis_id: response.data.job_id,
-            status: 'processing'
-          }
-        };
-      }
       return response.data;
     } catch (error: any) {
       throw error.response?.data || error;
@@ -57,16 +49,22 @@ export const analysisApi = {
 
   /**
    * Get WebSocket URL for live log streaming
-   * Usage: const ws = new WebSocket(await analysisApi.getWebSocketUrl(analysisId))
+   * Usage: const ws = new WebSocket(await analysisApi.getWebSocketUrl(jobId))
+   * @param jobId - The job_id returned from analysisApi.start
    */
-  getWebSocketUrl: async (analysisId: string): Promise<string> => {
+  getWebSocketUrl: async (jobId: string): Promise<string> => {
+    const user = auth.currentUser;
+    if (!user) {
+      throw new Error('User not authenticated for WebSocket connection.');
+    }
+    const token = await user.getIdToken();
+
     const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
+    // Replace http/https with ws/wss and remove trailing slash if any
     const wsProtocol = baseUrl.startsWith('https') ? 'wss' : 'ws';
-    const wsBase = baseUrl.replace(/^https?:/, '');
+    const wsBase = baseUrl.replace(/^https?:\/\//, ''); // Remove protocol part
     
-    // Get auth token
-    const token = localStorage.getItem('auth_token');
-    return `${wsProtocol}:${wsBase}/api/v1/analysis/${analysisId}/stream?token=${token}`;
+    return `${wsProtocol}://${wsBase}/api/v1/analysis/stream/${jobId}?token=${token}`;
   },
 
   /**
