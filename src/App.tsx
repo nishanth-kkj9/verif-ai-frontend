@@ -8,6 +8,7 @@ import StudentDashboard from './pages/StudentDashboard';
 import StudentHomePage from './pages/StudentHomePage';
 import RecruiterDashboard from './pages/RecruiterDashboard';
 import PublicProfilePage from './pages/PublicProfilePage';
+import SettingsPage from './pages/SettingsPage';
 import { useAuthStore } from './store/authStore';
 
 const ProtectedRoute: React.FC<{
@@ -75,6 +76,12 @@ const App: React.FC = () => {
         <Route 
           path="/profile/:userId" 
           element={<ProtectedRoute element={<PublicProfilePage />} requiredRole="recruiter" />}
+        />
+
+        {/* Settings */}
+        <Route 
+          path="/settings" 
+          element={<ProtectedRoute element={<SettingsPage />} />}
         />
         
         <Route path="/" element={isAuthenticated ? <Navigate to="/dashboard" /> : <LandingPage />} />

@@ -10,7 +10,8 @@ import {
   Search, 
   FileText, 
   Bell,
-  CheckCircle2
+  CheckCircle2,
+  Settings
 } from 'lucide-react';
 
 const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -61,6 +62,13 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
               </button>
             </>
           )}
+
+          <div className="pt-4 mt-4 border-t border-white/5">
+            <Link to="/settings" className="w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-gray-500 hover:bg-white/5 hover:text-white transition-all">
+              <Settings className="h-5 w-5" />
+              <span className="font-medium">Settings</span>
+            </Link>
+          </div>
         </nav>
 
         <div className="p-6 border-t border-white/5">

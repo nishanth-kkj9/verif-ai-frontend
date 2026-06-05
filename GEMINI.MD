@@ -442,12 +442,12 @@ VITE_API_BASE_URL=https://verif-ai-backend.onrender.com
 - [ ] `TrustScoreCard.tsx` — appears on `analysis_complete` event
 
 ### Phase 3: Public Profile + Recruiter
-- [ ] `PublicProfilePage.tsx` — `/profile/:uid` → `GET /api/v1/profile/:uid`
-- [ ] Toggle public/private on student dashboard
-- [ ] `RecruiterDashboard.tsx` with `SearchFilters.tsx`
-- [ ] Wire search to `GET /api/v1/discover/search`
-- [ ] `StudentCard.tsx` in results grid
-- [ ] Shortlist button → `POST /api/v1/discover/shortlist`
+- [x] `PublicProfilePage.tsx` — `/profile/:uid` → `GET /api/v1/profile/:uid`
+- [x] Toggle public/private on student dashboard (moved to SettingsPage)
+- [x] `RecruiterDashboard.tsx` with `SearchFilters.tsx`
+- [x] Wire search to `GET /api/v1/discover/search`
+- [x] `StudentCard.tsx` in results grid
+- [x] Shortlist button → `POST /api/v1/discover/shortlist`
 
 ### Phase 4: Polish + Deploy
 - [x] `LandingPage.tsx` — hero with product explanation
