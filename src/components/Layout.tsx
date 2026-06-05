@@ -105,9 +105,13 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
               <Bell className="h-5 w-5" />
               <span className="absolute top-2 right-2 h-2 w-2 bg-blue-500 rounded-full border-2 border-[#0a0a0c]" />
             </button>
-            <div className="flex items-center gap-2 px-3 py-1.5 bg-emerald-500/10 border border-emerald-500/20 rounded-full">
+            <div className="flex items-center gap-2 px-3 py-1.5 bg-emerald-500/10 border border-emerald-500/20 rounded-full hidden sm:flex">
               <CheckCircle2 className="h-4 w-4 text-emerald-500" />
               <span className="text-xs font-bold text-emerald-500 uppercase tracking-tighter">System Live</span>
+            </div>
+            
+            <div className="h-9 w-9 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold shadow-lg border border-white/10 cursor-pointer hover:scale-105 transition-transform">
+              {user?.display_name?.charAt(0).toUpperCase() || user?.email?.charAt(0).toUpperCase() || 'U'}
             </div>
           </div>
         </header>
