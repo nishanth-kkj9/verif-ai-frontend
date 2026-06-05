@@ -61,8 +61,8 @@ const StudentHomePage: React.FC = () => {
     <div className="flex flex-col min-h-screen bg-slate-50">
       <TopNav />
 
-      <div className="flex flex-grow gap-8 p-6 max-w-7xl mx-auto w-full">
-        {/* LEFT COLUMN - Main Content */}
+      <div className="flex flex-grow p-6 max-w-5xl mx-auto w-full">
+        {/* SINGLE COLUMN - Main Content */}
         <div className="flex-1 min-w-0 flex flex-col gap-6 pt-2">
           
           <SearchBar onSearch={handleSearch} />
@@ -81,11 +81,6 @@ const StudentHomePage: React.FC = () => {
               ))}
             </div>
           </div>
-        </div>
-
-        {/* RIGHT COLUMN - Profile Sidebar */}
-        <div className="hidden lg:block pt-2">
-          <ProfileSidebar />
         </div>
       </div>
     </div>

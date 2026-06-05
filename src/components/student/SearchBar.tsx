@@ -19,8 +19,8 @@ const SearchBar: React.FC<SearchBarProps> = ({ onSearch }) => {
 
   return (
     <div
-      className={`glass-card rounded-2xl px-6 py-4 flex items-center gap-3 transition-shadow duration-200 ${
-        isFocused ? 'shadow-xl' : 'shadow-md'
+      className={`bg-white rounded-2xl px-6 py-4 flex items-center gap-3 transition-shadow duration-200 border border-slate-100 ${
+        isFocused ? 'shadow-lg shadow-indigo-100/50' : 'shadow-sm'
       }`}
     >
       <Search className="w-5 h-5 text-slate-400" />

@@ -44,7 +44,7 @@ const FiltersRow: React.FC = () => {
   );
 
   return (
-    <div className="glass-card rounded-xl px-4 py-3 overflow-x-auto no-scrollbar flex items-center">
+    <div className="bg-white rounded-2xl px-4 py-3 border border-slate-100 shadow-sm overflow-x-auto no-scrollbar flex items-center">
       {/* Group 1: Filter by Skill */}
       <div className="flex items-center flex-shrink-0">
         <span className="text-xs text-slate-400 font-medium mr-2">Skills</span>
