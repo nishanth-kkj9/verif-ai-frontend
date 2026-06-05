@@ -17,7 +17,7 @@ const UploadRow: React.FC<UploadRowProps> = ({ icon: Icon, label, status, value 
       </div>
 
       {status === 'empty' ? (
-        <button className="text-[10px] text-indigo-500 border border-dashed border-indigo-300 px-2.5 py-1 rounded-lg hover:border-indigo-500 hover:bg-indigo-50 transition font-medium">
+        <button className="text-[10px] text-indigo-500 border border-dashed border-indigo-300 px-2.5 py-1 rounded-lg hover:border-solid hover:border-indigo-500 hover:bg-indigo-50 transition-all font-medium">
           Upload PDF
         </button>
       ) : (

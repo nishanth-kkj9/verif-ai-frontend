@@ -4,8 +4,8 @@ import {
   createUserWithEmailAndPassword, 
   signOut, 
   onAuthStateChanged,
-  User as FirebaseUser
 } from 'firebase/auth';
+import type { User as FirebaseUser } from 'firebase/auth';
 import { auth } from '../lib/firebase';
 import { authApi } from '../api/auth';
 import { useAuthStore } from '../store/authStore';
@@ -20,7 +20,7 @@ export const useAuth = () => {
   useEffect(() => {
     if (!auth) return;
 
-    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser: any) => {
       if (firebaseUser) {
         try {
           // If we have a firebase user but no user in store, fetch from backend

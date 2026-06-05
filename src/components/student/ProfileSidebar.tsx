@@ -40,7 +40,7 @@ const ProfileSidebar: React.FC = () => {
           <h2 className="text-xl font-bold text-slate-900 mt-4">Priya Sharma</h2>
           <p className="text-xs text-slate-500 mt-1 font-medium">B.Tech CSE • NITK 2025</p>
           
-          <div className="bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] px-3 py-1 rounded-full flex items-center gap-1.5 mt-3 font-semibold uppercase tracking-wider">
+          <div className="bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs px-3 py-1 rounded-full flex items-center gap-1.5 mt-3 font-semibold uppercase tracking-wider">
             <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
             Open to Work
           </div>
