@@ -4,6 +4,14 @@
 
 :root {
   font-family: 'Inter', system-ui, Avenir, Helvetica, Arial, sans-serif;
+  --bg-base: #f8fafc;
+  --bg-surface: #ffffff;
+  --bg-muted: #f1f5f9;
+  --border: #e2e8f0;
+  --text-primary: #0f172a;
+  --text-secondary: #64748b;
+  --accent: #6366f1;
+  --accent-light: #eef2ff;
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -14,8 +22,8 @@ body {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  background-color: #f8fafc;
-  color: #0f172a;
+  background-color: var(--bg-base);
+  color: var(--text-primary);
 }
 
 @layer components {
@@ -31,6 +39,7 @@ body {
     animation: fadeSlideUp 0.4s ease-out forwards;
   }
 
+  .animation-delay-0 { animation-delay: 0ms; }
   .animation-delay-100 { animation-delay: 100ms; }
   .animation-delay-200 { animation-delay: 200ms; }
   .animation-delay-300 { animation-delay: 300ms; }

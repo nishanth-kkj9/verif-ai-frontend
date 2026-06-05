@@ -41,14 +41,26 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
             <LayoutDashboard className="h-5 w-5" />
             <span className="font-medium">Dashboard</span>
           </Link>
-          <button className="w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-gray-500 hover:bg-white/5 hover:text-white transition-all">
-            <FileText className="h-5 w-5" />
-            <span className="font-medium">My Documents</span>
-          </button>
-          <button className="w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-gray-500 hover:bg-white/5 hover:text-white transition-all">
-            <Search className="h-5 w-5" />
-            <span className="font-medium">Discovery</span>
-          </button>
+          
+          {user?.role === 'student' ? (
+            <>
+              <button className="w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-gray-500 hover:bg-white/5 hover:text-white transition-all">
+                <FileText className="h-5 w-5" />
+                <span className="font-medium">My Documents</span>
+              </button>
+            </>
+          ) : (
+            <>
+              <Link to="/discover" className="w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-gray-500 hover:bg-white/5 hover:text-white transition-all">
+                <Search className="h-5 w-5" />
+                <span className="font-medium">Discovery</span>
+              </Link>
+              <button className="w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-gray-500 hover:bg-white/5 hover:text-white transition-all">
+                <FileText className="h-5 w-5" />
+                <span className="font-medium">Shortlist</span>
+              </button>
+            </>
+          )}
         </nav>
 
         <div className="p-6 border-t border-white/5">
