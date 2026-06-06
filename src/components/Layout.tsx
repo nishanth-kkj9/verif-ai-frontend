@@ -7,7 +7,6 @@ import {
   User,
   ShieldCheck,
   LayoutDashboard,
-  Search,
   FileText,
   Bell,
   CheckCircle2,
@@ -70,29 +69,26 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
               <span className="font-medium">My Documents</span>
             </Link>
           </>
-        ) : (
+        ) : user?.role === 'recruiter' ? (
           <>
-            <Link to="/recruiter-home" className="flex items-center space-x-3 px-4 py-3 rounded-xl bg-blue-50 text-blue-600 border border-blue-100">
-              <LayoutDashboard className="h-5 w-5" />
+            <Link to="/recruiter/applications" className="flex items-center space-x-3 px-4 py-3 rounded-xl text-gray-500 hover:bg-gray-50 hover:text-gray-900 transition-all">
+              <FileText className="h-5 w-5" />
               <span className="font-medium">Applications</span>
             </Link>
-            <Link to="/discover" className="w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-gray-500 hover:bg-gray-50 hover:text-gray-900 transition-all">
-              <Search className="h-5 w-5" />
-              <span className="font-medium">Discover</span>
-            </Link>
-            <Link to="/shortlist" className="w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-gray-500 hover:bg-gray-50 hover:text-gray-900 transition-all">
+            <Link to="/shortlist" className="flex items-center space-x-3 px-4 py-3 rounded-xl text-gray-500 hover:bg-gray-50 hover:text-gray-900 transition-all">
               <Star className="h-5 w-5" />
               <span className="font-medium">Shortlist</span>
             </Link>
+            <Link to="/recruiter/posted-jobs" className="flex items-center space-x-3 px-4 py-3 rounded-xl text-gray-500 hover:bg-gray-50 hover:text-gray-900 transition-all">
+              <Briefcase className="h-5 w-5" />
+              <span className="font-medium">Posted Jobs</span>
+            </Link>
+            <Link to="/settings" className="flex items-center space-x-3 px-4 py-3 rounded-xl text-gray-500 hover:bg-gray-50 hover:text-gray-900 transition-all">
+              <Settings className="h-5 w-5" />
+              <span className="font-medium">Settings</span>
+            </Link>
           </>
-        )}
-
-        <div className="pt-4 mt-4 border-t border-gray-100">
-          <Link to="/settings" className="w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-gray-500 hover:bg-gray-50 hover:text-gray-900 transition-all">
-            <Settings className="h-5 w-5" />
-            <span className="font-medium">Settings</span>
-          </Link>
-        </div>
+        ) : null}
       </nav>
 
       <div className="p-4 lg:p-6 border-t border-gray-100">

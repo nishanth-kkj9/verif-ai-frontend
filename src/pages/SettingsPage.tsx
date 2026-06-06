@@ -4,8 +4,10 @@ import { Card, CardBody, CardHeader } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { useAuthStore } from '../store/authStore';
+import { authApi } from '../api/auth';
 import toast from 'react-hot-toast';
-import { Lock, Bell, Shield } from 'lucide-react';
+import { Lock, Bell, Shield, Trash2, AlertTriangle } from 'lucide-react';
+import { Modal } from '../components/ui/Modal';
 
 type SettingsSection = 'profile' | 'security' | 'notifications';
 
@@ -26,6 +28,12 @@ const SettingsPage: React.FC = () => {
   const [applicationUpdates, setApplicationUpdates] = useState(true);
   const [jobRecommendations, setJobRecommendations] = useState(true);
   const [marketingEmails, setMarketingEmails] = useState(false);
+
+  // Delete account state
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleteConfirmed, setDeleteConfirmed] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const { logout } = useAuthStore();
 
   const handleSaveSettings = async () => {
     setIsSaving(true);
@@ -59,6 +67,23 @@ const SettingsPage: React.FC = () => {
       toast.error('Failed to change password');
     } finally {
       setIsChangingPassword(false);
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    if (!deleteConfirmed) {
+      toast.error('Please confirm deletion');
+      return;
+    }
+    setIsDeleting(true);
+    try {
+      await authApi.deleteAccount();
+      toast.success('Account deleted successfully');
+      logout();
+    } catch (error) {
+      toast.error('Failed to delete account');
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -340,7 +365,87 @@ const SettingsPage: React.FC = () => {
             )}
           </div>
         </div>
+
+        {/* Delete Account Section */}
+        <Card bordered className="border-red-200">
+          <CardHeader>
+            <h2 className="text-lg font-bold text-red-600 flex items-center gap-2">
+              <AlertTriangle className="w-5 h-5" />
+              Danger Zone
+            </h2>
+            <p className="text-sm text-gray-500 mt-1">Permanently delete your account and all data</p>
+          </CardHeader>
+          <CardBody>
+            <div className="flex items-center justify-between p-4 bg-red-50 rounded-xl border border-red-200">
+              <div>
+                <h3 className="font-medium text-gray-900">Delete Account</h3>
+                <p className="text-sm text-gray-500 mt-1">This action cannot be undone. All your data will be permanently deleted.</p>
+              </div>
+              <Button
+                variant="danger"
+                size="sm"
+                onClick={() => setShowDeleteModal(true)}
+              >
+                <Trash2 className="w-4 h-4 mr-2" />
+                Delete Account
+              </Button>
+            </div>
+          </CardBody>
+        </Card>
       </div>
+
+      {/* Delete Account Modal */}
+      <Modal isOpen={showDeleteModal} onClose={() => setShowDeleteModal(false)}>
+        <div className="p-6">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
+              <AlertTriangle className="w-6 h-6 text-red-600" />
+            </div>
+            <div>
+              <h3 className="text-lg font-bold text-gray-900">Delete Account?</h3>
+              <p className="text-sm text-gray-500">This action is permanent and cannot be undone.</p>
+            </div>
+          </div>
+
+          <p className="text-sm text-gray-600 mb-4">
+            All your data including your profile, documents, applications, and account access will be permanently deleted from MongoDB, Firestore, and Firebase Auth.
+          </p>
+
+          <label className="flex items-center gap-3 p-4 bg-red-50 border border-red-200 rounded-xl cursor-pointer hover:bg-red-100 transition-colors mb-6">
+            <input
+              type="checkbox"
+              checked={deleteConfirmed}
+              onChange={(e) => setDeleteConfirmed(e.target.checked)}
+              className="w-5 h-5 text-red-500 rounded border-red-300 focus:ring-red-500"
+            />
+            <span className="text-sm font-medium text-gray-900">
+              I understand this action is permanent and cannot be undone
+            </span>
+          </label>
+
+          <div className="flex gap-3">
+            <Button
+              variant="secondary"
+              onClick={() => {
+                setShowDeleteModal(false);
+                setDeleteConfirmed(false);
+              }}
+              className="flex-1"
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="danger"
+              onClick={handleDeleteAccount}
+              isLoading={isDeleting}
+              disabled={!deleteConfirmed}
+              className="flex-1"
+            >
+              Delete Forever
+            </Button>
+          </div>
+        </div>
+      </Modal>
     </Layout>
   );
 };

@@ -3,67 +3,9 @@ import { MapPin, Clock, ExternalLink, Search, Briefcase, Loader2, Building2 } fr
 import Layout from '../components/Layout';
 import { Card, CardBody } from '../components/ui/Card';
 import { Badge } from '../components/ui/Badge';
-import { jobsApi } from '../api/jobs';
+import { useAuthStore } from '../store/authStore';
 import toast from 'react-hot-toast';
-
-const MOCK_JOB_DATA = [
-  {
-    id: 'mock-1',
-    companyLogoInitials: 'G',
-    companyName: 'Google',
-    timeAgo: '2h ago',
-    jobTitle: 'Senior Frontend Engineer',
-    location: 'Bangalore, India',
-    jobType: 'Remote',
-    skills: ['React', 'TypeScript', 'Node.js'],
-    salaryRange: '₹40-60 LPA',
-    logoColor: 'bg-gradient-to-br from-emerald-400 to-emerald-600',
-    description: 'We are looking for a Senior Frontend Engineer to join our team.',
-    created_at: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
-  },
-  {
-    id: 'mock-2',
-    companyLogoInitials: 'FK',
-    companyName: 'Flipkart',
-    timeAgo: '5h ago',
-    jobTitle: 'Data Analyst Intern',
-    location: 'Bangalore, India',
-    jobType: 'Hybrid',
-    skills: ['Python', 'SQL', 'Pandas'],
-    salaryRange: '₹8-12 LPA',
-    logoColor: 'bg-gradient-to-br from-amber-400 to-amber-600',
-    description: 'Join Flipkart as a Data Analyst Intern.',
-    created_at: new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString(),
-  },
-  {
-    id: 'mock-3',
-    companyLogoInitials: 'RP',
-    companyName: 'Razorpay',
-    timeAgo: '1d ago',
-    jobTitle: 'Backend Developer',
-    location: 'Remote',
-    jobType: 'Full-time',
-    skills: ['FastAPI', 'PostgreSQL', 'Docker'],
-    salaryRange: '₹25-35 LPA',
-    logoColor: 'bg-gradient-to-br from-blue-500 to-blue-700',
-    description: 'Build scalable payment infrastructure.',
-    created_at: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
-  },
-  {
-    id: 'mock-4',
-    companyLogoInitials: 'SW',
-    companyName: 'Swiggy',
-    timeAgo: '2d ago',
-    jobTitle: 'ML Engineer',
-    location: 'Bangalore, India',
-    jobType: 'On-site',
-    skills: ['Python', 'TensorFlow', 'MLflow'],
-    salaryRange: '₹30-45 LPA',
-    logoColor: 'bg-gradient-to-br from-orange-400 to-orange-600',
-    description: 'Build ML models for food delivery optimization.',
-    created_at: new Date(Date.now() - 48 * 60 * 60 * 1000).toISOString(),
-  },
-];
+import { jobsApi } from '../api/jobs';
 
 const JobCard: React.FC<{
   companyLogoInitials: string;
@@ -160,75 +102,59 @@ const StudentHomePage: React.FC = () => {
   const [jobs, setJobs] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [applyingJobId, setApplyingJobId] = useState<string | null>(null);
+  const { loading: authLoading, isAuthenticated } = useAuthStore();
 
   useEffect(() => {
+    if (authLoading || !isAuthenticated) return;
+
     const loadJobs = async () => {
       setIsLoading(true);
       try {
-        const response = await jobsApi.getJobs();
-        if (response.success && response.data.length > 0) {
-          setJobs(response.data);
-        } else {
-          setJobs([]);
-        }
+        const result = await jobsApi.getJobs();
+        setJobs(result.data || []);
       } catch (error) {
         console.error('Failed to load jobs:', error);
+        toast.error('Failed to load jobs. Please try again.');
       } finally {
         setIsLoading(false);
       }
     };
+
     loadJobs();
-  }, []);
+  }, [authLoading, isAuthenticated]);
 
   const handleApply = async (jobId: string) => {
+    if (!jobId) return;
     setApplyingJobId(jobId);
     try {
-      await jobsApi.applyForJob(jobId);
-      toast.success('Application submitted successfully!');
+      const result = await jobsApi.applyForJob(jobId);
+      if (result.success) {
+        toast.success('Application submitted successfully!');
+      } else {
+        toast.error(result.message || 'Failed to apply');
+      }
     } catch (error: any) {
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      toast.success('Application submitted successfully!');
+      toast.error(error?.detail || 'Failed to submit application');
     } finally {
       setApplyingJobId(null);
     }
   };
 
-  const displayJobs = jobs.length > 0 ? jobs : MOCK_JOB_DATA;
-
-  const filterJobs = (jobs: typeof displayJobs) => {
-    return jobs.filter((job: any) => {
-      const matchesFilter = !activeFilter || job.jobType === activeFilter;
+  const filterJobs = (jobsToFilter: typeof jobs) => {
+    return jobsToFilter.filter((job: any) => {
+      const matchesFilter = !activeFilter || job.job_type === activeFilter;
       const matchesSearch = !searchQuery ||
-        job.jobTitle.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        job.companyName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        job.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        job.company_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         (job.skills || []).some((s: string) => s.toLowerCase().includes(searchQuery.toLowerCase()));
       return matchesFilter && matchesSearch;
     });
   };
 
-  const filteredJobs = filterJobs(displayJobs);
+  const filteredJobs = filterJobs(jobs);
 
   const handleFilterClick = (filter: string) => {
     setActiveFilter(prev => prev === filter ? null : filter);
-  };
-
-  const transformJob = (job: any) => {
-    const initials = (job.company_name || 'C').substring(0, 2).toUpperCase();
-    const timeAgo = job.created_at
-      ? `${Math.floor((Date.now() - new Date(job.created_at).getTime()) / (1000 * 60 * 60))}h ago`
-      : 'Recently posted';
-    return {
-      ...job,
-      companyLogoInitials: initials,
-      companyName: job.company_name,
-      timeAgo,
-      jobTitle: job.title,
-      location: job.location || 'Remote',
-      jobType: job.job_type,
-      skills: job.skills || [],
-      salaryRange: job.salary_range || 'Competitive',
-      logoColor: 'bg-gradient-to-br from-blue-400 to-blue-600',
-    };
   };
 
   if (isLoading) {
@@ -294,7 +220,7 @@ const StudentHomePage: React.FC = () => {
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-2">
               <Building2 className="w-5 h-5 text-blue-500" />
-              <h2 className="text-lg font-bold text-gray-900">Recommended for You</h2>
+              <h2 className="text-lg font-bold text-gray-900">Posted Jobs by Recruiters</h2>
             </div>
             <span className="text-sm text-gray-500">
               {filteredJobs.length} {filteredJobs.length === 1 ? 'job' : 'jobs'} found
@@ -304,11 +230,20 @@ const StudentHomePage: React.FC = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             {filteredJobs.map((job: any, index: number) => {
-              const transformedJob = jobs.length > 0 ? transformJob(job) : job;
               return (
                 <JobCard
                   key={job.id || index}
-                  {...transformedJob}
+                  companyLogoInitials={(job.company_name || 'C').substring(0, 2).toUpperCase()}
+                  companyName={job.company_name}
+                  timeAgo={job.created_at
+                    ? `${Math.floor((Date.now() - new Date(job.created_at).getTime()) / (1000 * 60 * 60))}h ago`
+                    : 'Recently posted'}
+                  jobTitle={job.title}
+                  location={job.location || 'Remote'}
+                  jobType={job.job_type}
+                  skills={job.skills || []}
+                  salaryRange={job.salary_range || 'Competitive'}
+                  logoColor="bg-gradient-to-br from-blue-400 to-blue-600"
                   animationDelay={`${index * 100}ms`}
                   onApply={() => job.id && handleApply(job.id)}
                   isApplying={applyingJobId === job.id}

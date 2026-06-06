@@ -8,9 +8,11 @@ import StudentDashboard from './pages/StudentDashboard';
 import StudentHomePage from './pages/StudentHomePage';
 import RecruiterDashboard from './pages/RecruiterDashboard';
 import RecruiterHomePage from './pages/RecruiterHomePage';
+import RecruiterApplicationsPage from './pages/RecruiterApplicationsPage';
+import ShortlistPage from './pages/ShortlistPage';
+import PostedJobsPage from './pages/PostedJobsPage';
 import ApplicationDetailPage from './pages/ApplicationDetailPage';
 import MyDocumentsPage from './pages/MyDocumentsPage';
-import ShortlistPage from './pages/ShortlistPage';
 import PublicProfilePage from './pages/PublicProfilePage';
 import SettingsPage from './pages/SettingsPage';
 import { useAuthStore } from './store/authStore';
@@ -80,10 +82,22 @@ const App: React.FC = () => {
               element={<ProtectedRoute element={<RecruiterDashboard />} requiredRole="recruiter" />}
             />
 
-            {/* Recruiter Home - Applications */}
+            {/* Recruiter Home - Navigation Hub */}
             <Route
               path="/recruiter-home"
               element={<ProtectedRoute element={<RecruiterHomePage />} requiredRole="recruiter" />}
+            />
+
+            {/* Recruiter Applications */}
+            <Route
+              path="/recruiter/applications"
+              element={<ProtectedRoute element={<RecruiterApplicationsPage />} requiredRole="recruiter" />}
+            />
+
+            {/* Recruiter Posted Jobs */}
+            <Route
+              path="/recruiter/posted-jobs"
+              element={<ProtectedRoute element={<PostedJobsPage />} requiredRole="recruiter" />}
             />
 
             {/* Application Detail */}

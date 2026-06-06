@@ -12,6 +12,7 @@ import { analysisApi } from '../api/analysis';
 import { documentsApi } from '../api/documents';
 import { profileApi } from '../api/profile';
 import { TrustScore, Document } from '../types';
+import { useAuthStore } from '../store/authStore';
 import toast from 'react-hot-toast';
 
 const StudentDashboard: React.FC = () => {
@@ -29,6 +30,7 @@ const StudentDashboard: React.FC = () => {
 
   const { logs, isConnected, isLoading, error, agentStatuses, clearLogs } =
     useAnalysisStream(websocketUrl);
+  const { loading: authLoading, isAuthenticated } = useAuthStore();
 
   const checkReadiness = useCallback(async () => {
     try {
@@ -45,6 +47,8 @@ const StudentDashboard: React.FC = () => {
 
   // Load social links on mount
   useEffect(() => {
+    if (authLoading) return;
+    if (!isAuthenticated) return;
     const loadSocialLinks = async () => {
       try {
         const response = await profileApi.getMe();
@@ -61,7 +65,7 @@ const StudentDashboard: React.FC = () => {
       }
     };
     loadSocialLinks();
-  }, []);
+  }, [authLoading, isAuthenticated]);
 
   const handleSaveLinks = async () => {
     setIsSavingLinks(true);
@@ -86,6 +90,8 @@ const StudentDashboard: React.FC = () => {
 
   // Load trust score and initial readiness on mount
   useEffect(() => {
+    if (authLoading) return;
+    if (!isAuthenticated) return;
     const loadInitialData = async () => {
       setIsLoadingTrustScore(true);
       try {
@@ -102,7 +108,7 @@ const StudentDashboard: React.FC = () => {
       checkReadiness();
     };
     loadInitialData();
-  }, [checkReadiness]);
+  }, [authLoading, isAuthenticated, checkReadiness]);
 
   const handleStartAnalysis = async () => {
     setIsStartingAnalysis(true);

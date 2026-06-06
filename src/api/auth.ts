@@ -40,5 +40,11 @@ export const authApi = {
   async getHealth(): Promise<HealthResponse> {
     const response = await apiClient.get('/api/v1/auth/health');
     return response.data;
+  },
+
+  // Delete account
+  async deleteAccount(): Promise<{ success: boolean; message: string }> {
+    const response = await apiClient.delete('/api/v1/auth/delete-account');
+    return response.data;
   }
 };

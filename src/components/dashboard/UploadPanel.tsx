@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { useDropzone } from 'react-dropzone';
-import { Upload, FileText, Award, Github, Loader2, CheckCircle2, AlertCircle, X } from 'lucide-react';
+import { Upload, FileText, Award, Github, CheckCircle2, X } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { Badge } from '../ui/Badge';
 import { Card, CardBody } from '../ui/Card';
@@ -365,22 +365,10 @@ export const UploadPanel: React.FC<UploadPanelProps> = ({ onUploadSuccess, onAna
                   </div>
 
                   <div className="flex items-center gap-2">
-                    {doc.status === 'pending' || doc.status === 'analyzing' ? (
-                      <Badge variant="warning" size="sm" className="flex items-center gap-1">
-                        <Loader2 className="h-3 w-3 animate-spin" />
-                        Processing...
-                      </Badge>
-                    ) : doc.status === 'processed' || doc.status === 'done' ? (
-                      <Badge variant="success" size="sm" className="flex items-center gap-1">
-                        <CheckCircle2 className="h-3 w-3" />
-                        Done
-                      </Badge>
-                    ) : doc.status === 'failed' ? (
-                      <Badge variant="error" size="sm" className="flex items-center gap-1">
-                        <AlertCircle className="h-3 w-3" />
-                        Failed
-                      </Badge>
-                    ) : null}
+                    <Badge variant="success" size="sm" className="flex items-center gap-1">
+                      <CheckCircle2 className="h-3 w-3" />
+                      Uploaded
+                    </Badge>
                   </div>
                 </div>
               </CardBody>

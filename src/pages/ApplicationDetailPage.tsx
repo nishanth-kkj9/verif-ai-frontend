@@ -171,30 +171,24 @@ const ApplicationDetailPage: React.FC = () => {
                   <h2 className="text-base font-semibold text-gray-900">Documents</h2>
                 </CardHeader>
                 <CardBody className="space-y-3">
-                  <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                    <div className="flex items-center gap-3">
-                      <FileText className="w-5 h-5 text-gray-400" />
-                      <div>
-                        <p className="text-sm font-medium text-gray-900">Resume</p>
-                        <p className="text-xs text-gray-400">resume.pdf</p>
+                  {application.student.documents && application.student.documents.length > 0 ? (
+                    application.student.documents.map((doc: any) => (
+                      <div key={doc.document_id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                        <div className="flex items-center gap-3">
+                          <FileText className="w-5 h-5 text-gray-400" />
+                          <div>
+                            <p className="text-sm font-medium text-gray-900">{doc.name || 'Document'}</p>
+                            <p className="text-xs text-gray-400">{doc.document_type || 'Document'}</p>
+                          </div>
+                        </div>
+                        <Button variant="ghost" size="sm">
+                          <ExternalLink className="w-4 h-4" />
+                        </Button>
                       </div>
-                    </div>
-                    <Button variant="ghost" size="sm">
-                      <ExternalLink className="w-4 h-4" />
-                    </Button>
-                  </div>
-                  <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                    <div className="flex items-center gap-3">
-                      <Award className="w-5 h-5 text-gray-400" />
-                      <div>
-                        <p className="text-sm font-medium text-gray-900">Certificates</p>
-                        <p className="text-xs text-gray-400">3 verified certificates</p>
-                      </div>
-                    </div>
-                    <Button variant="ghost" size="sm">
-                      <ExternalLink className="w-4 h-4" />
-                    </Button>
-                  </div>
+                    ))
+                  ) : (
+                    <p className="text-sm text-gray-400 text-center py-4">No documents available</p>
+                  )}
                 </CardBody>
               </Card>
             </div>

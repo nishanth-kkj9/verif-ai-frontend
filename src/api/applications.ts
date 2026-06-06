@@ -21,8 +21,8 @@ export const applicationsApi = {
       const response = await client.get('/api/v1/applications');
       return response.data;
     } catch (error: any) {
-      // Return empty array for now since backend may not have this endpoint
-      return { success: true, data: [] };
+      console.error('Failed to get applications:', error);
+      throw error.response?.data || error;
     }
   },
 
@@ -44,6 +44,18 @@ export const applicationsApi = {
   updateStatus: async (id: string, status: string): Promise<{ success: boolean; message: string }> => {
     try {
       const response = await client.patch(`/api/v1/applications/${id}/status`, { status });
+      return response.data;
+    } catch (error: any) {
+      throw error.response?.data || error;
+    }
+  },
+
+  /**
+   * Delete application (remove from recruiter dashboard)
+   */
+  deleteApplication: async (id: string): Promise<{ success: boolean; message: string }> => {
+    try {
+      const response = await client.delete(`/api/v1/applications/${id}`);
       return response.data;
     } catch (error: any) {
       throw error.response?.data || error;

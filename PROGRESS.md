@@ -33,6 +33,7 @@ This file tracks the implementation status of the frontend, mapping components t
 - [x] Shortlist functionality
 - [x] API: discover.ts (search, featured, skills, shortlist)
 - [x] API: profile.ts (get public/me, update, visibility toggle)
+- [x] API: jobs.ts (createJob)
 
 ## 🎨 Phase 4: UI Component Library
 - [x] Button component (multiple variants)
